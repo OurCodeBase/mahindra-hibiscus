@@ -47,6 +47,7 @@ export default function App() {
               { value: vinnos[index] },
               { value: "Yes" },
               { value: dataModel[0].signupStatus == false ? "No" : "Yes" },
+              { value: dataModel[0].name },
             ]
             database.push(row);
           } else {
@@ -145,7 +146,7 @@ export default function App() {
       </div>
       {sheet.length > 0 && <div className="mt-2">
         <div className="backdrop-brightness-60 max-h-[300px] overflow-auto backdrop-contrast-125 font-mono border-1 border-stone-400 rounded-md p-2">
-          <Spreadsheet data={sheet} columnLabels={["VIN Number", "KYC", "SignUp"]}/>
+          <Spreadsheet data={sheet} columnLabels={["VIN Number", "KYC", "SignUp", "Customer"]}/>
         </div>
       </div>}
       {exception && <div className="text-sm font-mono mt-3 p-3 flex flex-row text-red-500 font-bold bg-red-100 border-1 rounded-md">
