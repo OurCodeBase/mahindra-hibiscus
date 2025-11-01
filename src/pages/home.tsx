@@ -76,7 +76,7 @@ export default function App() {
       title: "LOGOUT",
       color: "bg-rose-500",
       callback: () => {
-        setException("LOGOUT: Close the extension popup.")
+        setException("Close the popup window and open again.")
         removeToken()
       }
     },
@@ -115,7 +115,7 @@ export default function App() {
         <button
           type="submit"
           disabled={loading || !search.trim()}
-          className="bg-lime-600 ml-2 p-3 hover:bg-lime-700 text-lime-100 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-lime-600 ml-2 p-3 hover:bg-lime-700 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? <Loader className="animate-spin"/> : <Search/>}
         </button>
@@ -140,7 +140,7 @@ export default function App() {
       </div>
       <div className="w-full flex justify-center mt-2">
         {actionBtns.map(option => <button onClick={option.callback} key={option.title}
-          className={`py-2 shadow-lg ${option.color} opacity-70 cursor-pointer text-green-100 font-mono mr-2 px-2 h-min text-nowrap`}>
+          className={`py-2 shadow-lg ${option.color} cursor-pointer text-green-100 font-mono mr-2 px-2 h-min text-nowrap`}>
           {option.title}
         </button>)}
       </div>
@@ -149,8 +149,8 @@ export default function App() {
           <Spreadsheet data={sheet} columnLabels={["VIN Number", "KYC", "SignUp", "Customer"]}/>
         </div>
       </div>}
-      {exception && <div className="text-sm font-mono mt-3 p-3 flex flex-row text-red-500 font-bold bg-red-100 border-1 rounded-md">
-        <Info className="mr-1 size-4"/>
+      {exception && <div className="text-sm mt-3 p-3 flex flex-row text-red-500 font-bold bg-red-100 border-1 rounded-md">
+        <Info className="mr-2 size-5"/>
         {exception}
       </div>}
     </div>
