@@ -30,7 +30,7 @@ Note: The extension does not collect personal data by default. See Privacy below
 This extension runs locally in your browser and only sends the inputs you provide to the configured Mahindra endpoints for validation. It stores settings and recent results in your browser storage. For more info, see the source or open an issue if you need a data-handling audit.
 
 ## 📜 License
-See the LICENSE file in the repository for license details.
+See the `license.md` file in the repository for license details.
 
 Enjoy bulk-checking with Mahindra Hibiscus! 🌺✨
 If you need help, open an issue or contact the maintainers.
