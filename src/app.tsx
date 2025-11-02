@@ -1,13 +1,13 @@
 import { useToken } from "./hooks";
-import { Suspension, Home, Authentication } from "./pages";
+import { Suspension, Home, Authorization } from "./pages";
 
 function App() {
   const { token } = useToken();
   return (
     <div className="banner w-md max-w-md">
-      <Authentication>
+      <Authorization>
         {token ? <Home/> : <Suspension/>}
-      </Authentication>
+      </Authorization>
     </div>
   )
 }
