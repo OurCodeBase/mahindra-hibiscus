@@ -3,7 +3,7 @@ import { defineManifest } from "@crxjs/vite-plugin";
 export default defineManifest({
   manifest_version: 3,
   name: "mahindra-hibiscus",
-  description: "A chromium extension to check mahindra adrenox and imaxx in bulk.",
+  description: "A Chromium extension to check Mahindra Adrenox and Imaxx in bulk. ⚡️",
   version: "1.1",
   icons: {
     16: "icon.png",
