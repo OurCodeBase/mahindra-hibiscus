@@ -1,15 +1,13 @@
 name: Release Builds
-
 on:
   push:
     tags:
-      - 'v*' # Triggers the workflow when a tag starting with 'v' is pushed
-
+      - 'v*'
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Grants the GITHUB_TOKEN the necessary permission to create a release and upload assets
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,11 +28,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          release_name: Build ${{ github.ref_name }}
           body: 'Take this release, extract and use it in chromium based browser as developer.'
           draft: false
           prerelease: false
-
+      - name: Extract extension name.
+        id: exponame
+        run: |
+          REPO_LONG="${{ github.repository }}"
+          REPO_BASE=$(basename $REPO_LONG)
+          REPO_SHORT=${REPO_BASE#*-}
+          echo "extension_name=$REPO_SHORT" >> $GITHUB_OUTPUT
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
@@ -42,5 +46,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./release/release.zip
-          asset_name: ${{ github.repository }}-${{ github.ref }}.zip
+          asset_name: ${{ steps.exponame.outputs.extension_name }}-${{ github.ref_name }}.zip
           asset_content_type: application/zip
