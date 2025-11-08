@@ -1,0 +1,46 @@
+name: Release Builds
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers the workflow when a tag starting with 'v' is pushed
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Grants the GITHUB_TOKEN the necessary permission to create a release and upload assets
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 'latest'
+      - name: Install dependencies and build release.
+        env:
+          VITE_LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
+        run: |
+          npm install
+          npm run build
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: 'Take this release, extract and use it in chromium based browser as developer.'
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/release.zip
+          asset_name: ${{ github.repository }}-${{ github.ref }}.zip
+          asset_content_type: application/zip
