@@ -40,25 +40,22 @@ export default function App() {
           return;
         }
         const response = await request.json();
-        if (response.statusCode == 200) {
-          const dataModel = response["dataModel"]["data"]
-          if (dataModel.length > 0) {
-            const row = [
-              { value: vinnos[index] },
-              { value: "Yes" },
-              { value: dataModel[0].signupStatus == false ? "No" : "Yes" },
-              { value: dataModel[0].name },
-            ]
-            database.push(row);
-          } else {
-            const row = [
-              { value: vinnos[index] },
-              { value: "No" },
-            ]
-            database.push(row);
-          }
+        const dataModel = response["dataModel"]["data"]
+        if (dataModel.length > 0) {
+          const model = dataModel[dataModel.length - 1];
+          const row = [
+            { value: vinnos[index] },
+            { value: model.kycRegistrationStatus ? "Yes" : "No" },
+            { value: model.signupStatus ? "Yes" : "No" },
+            { value: model.name },
+          ]
+          database.push(row);
         } else {
-          const row = [{ value: vinnos[index] }]
+          const row = [
+            { value: vinnos[index] },
+            { value: "No" },
+            { value: "No" },
+          ]
           database.push(row);
         }
       }
