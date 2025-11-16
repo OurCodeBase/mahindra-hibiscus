@@ -5,7 +5,7 @@ async function checkLicense(): Promise<boolean> {
   try {
     const cache = await chrome.storage.session.get('unauthorized');
     if (cache && cache['unauthorized']) return cache['unauthorized'];
-    const request = await fetch("https://mahindr.static.domains/license.json");
+    const request = await fetch("https://mahindr.appwrite.network/license.json");
     const response:Array<string> = await request.json();
     await chrome.storage.session.set({
       unauthorized: !response.includes(import.meta.env.VITE_LICENSE_KEY)
