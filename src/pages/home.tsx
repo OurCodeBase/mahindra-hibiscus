@@ -1,117 +1,72 @@
-import { useToken } from "../hooks";
-import { Logo } from "../components";
+import { useToken } from "@/hooks";
+import { Logo } from "@/components";
 import { useEffect, useState } from "react";
 import Spreadsheet from "react-spreadsheet";
-import { Info, Loader, Search } from "lucide-react";
+import { Loader, Search } from "lucide-react";
+import { SearchConsole } from "@/utils/search";
 
 export default function App() {
   const { token, removeToken } = useToken();
-  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [sheet, setSheet] = useState<Array<any>>([]);
-  const [api, setApi] = useState<"service" | "service-cv">("service")
-  const [exception, setException] = useState<string | undefined>()
-  const connectToBackend = async (vinnos: Array<string>) => {
+  const [service, setService] = useState<"service" | "service-cv">("service")
+  const [notification, setNotification] = useState<string | undefined>()
+  const callbacks = (action: 'logout' | 'clear') => {
+    switch (action) {
+      case 'logout':
+        setNotification("Reopen this extension window.");
+        removeToken();
+        break;
+      case 'clear':
+        chrome.storage.session.remove("hibiscus-database");
+        setSheet([]);
+        break;
+    }
+  }
+  const actionBtns: Array<{ title: string, color: string, callback: () => void }> = [
+    { title: "LOGOUT", color: "bg-rose-500", callback: () => {callbacks('logout')} },
+    { title: "CLEAR", color: "bg-slate-500", callback: () => {callbacks('clear')} }
+  ]
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const search = formData.get('vinnos')?.toString().toUpperCase() || "";
+    if (!search.trim()) return;
+    setLoading(true);
+    setNotification(undefined);
     try {
-      if (!token) return;
-      const database = [];
-      for (let index = 0; index < vinnos.length; index++) {
-        const request = await fetch(`https://${api}.mahindramobilitysolution.com/iTraMS-webservices/kyc/getAllKyc`, {
-          method: "POST",
-          headers: {
-            "accept": "application/json",
-            "authorization": token.authorization,
-            "content-type": "application/json"
-          },
-          body: JSON.stringify({
-            direction: "ascending",
-            sortingAttribute: "vinNumber",
-            pageSize: 10,
-            recordsCountToFetch: 100,
-            pageNumber: 0,
-            textToFilter: vinnos[index]
-          }),
-          credentials: "include"
-        });
-        if (request.status == 401) {
-          removeToken();
-          setException("Your session has been expired!")
-          setLoading(false);
-          return;
-        }
-        const response = await request.json();
-        const dataModel = response["dataModel"]["data"]
-        if (dataModel.length > 0) {
-          const model = dataModel[dataModel.length - 1];
-          const row = [
-            { value: vinnos[index] },
-            { value: model.kycRegistrationStatus ? "Yes" : "No" },
-            { value: model.signupStatus ? "Yes" : "No" },
-            { value: model.name },
-          ]
-          database.push(row);
-        } else {
-          const row = [
-            { value: vinnos[index] },
-            { value: "No" },
-            { value: "No" },
-          ]
-          database.push(row);
-        }
-      }
-      chrome.storage.session.set({ "hibiscus-database": JSON.stringify(database) })
+      if (!token) throw new Error("You need a session id first.");
+      const searchConsole = new SearchConsole(token, search);
+      const database = await searchConsole.getAllKyc(service);
+      chrome.storage.session.set({ "hibiscus-database": JSON.stringify(database) });
       setSheet(database);
     } catch (e) {
-      console.log(e);
-      setException("Something went wrong...");
+      if (!(e instanceof Error)) return console.error(e);
+      setNotification(e.message);
+      if (e.name == "AUTHORIZATION-REVOKED") removeToken();
+      console.error(e);
     } finally {
       setLoading(false);
     }
   }
-  const actionBtns: Array<{ title: string, color: string, callback: () => void }> = [
-    {
-      title: "LOGOUT",
-      color: "bg-rose-500",
-      callback: () => {
-        setException("Close the popup window and open again.")
-        removeToken()
-      }
-    },
-    {
-      title: "CLEAR",
-      color: "bg-slate-500",
-      callback: () => {
-        chrome.storage.session.remove("hibiscus-database");
-        setSheet([]);
-      }
-    },
-  ]
-  const handleSearch = (e: React.FormEvent): void => {
-    e.preventDefault();
-    if (!search.trim()) return;
-    setLoading(true);
-    setException(undefined);
-    connectToBackend(search.split(' '));
-  }
   useEffect(() => {
     chrome.storage.session.get("hibiscus-database").then((response) => {
-      if (response && response["hibiscus-database"]) setSheet(JSON.parse(response["hibiscus-database"]))
+      if (response && response["hibiscus-database"])
+        setSheet(JSON.parse(response["hibiscus-database"]))
     })
   }, [])
-  return (
+  return <>
     <div className="shadow-xl p-4 max-w-md">
       {sheet.length == 0 && <Logo/>}
       <form onSubmit={handleSearch} className={"flex flex-row w-full justify-center"}>
         <input
           type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value.toUpperCase())}
+          name="vinnos"
           placeholder="Feed me vin no. column"
           className="px-4 bg-green-50 text-green-600 placeholder-stone-400 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all cursor-pointer"
         />
         <button
           type="submit"
-          disabled={loading || !search.trim()}
           className="bg-lime-600 ml-2 p-3 hover:bg-lime-700 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? <Loader className="animate-spin"/> : <Search/>}
@@ -124,8 +79,8 @@ export default function App() {
               id={"hibiscus-" + value}
               type="radio"
               onChange={(e) => {
-                if (e.currentTarget.id == "hibiscus-commercial") setApi("service-cv")
-                else setApi("service")
+                if (e.currentTarget.id == "hibiscus-commercial") setService("service-cv")
+                else setService("service")
               }}
               disabled={loading}
               defaultChecked={index == 0 ? true : false}
@@ -146,10 +101,11 @@ export default function App() {
           <Spreadsheet data={sheet} columnLabels={["VIN Number", "KYC", "SignUp", "Customer"]}/>
         </div>
       </div>}
-      {exception && <div className="text-sm mt-3 p-3 flex flex-row text-red-500 font-bold bg-red-100 border-1 rounded-md">
-        <Info className="mr-2 size-5"/>
-        {exception}
-      </div>}
     </div>
-  )
+    {notification ? <div className="w-full fixed top-0 flex justify-center">
+      <p className="bg-orange-300 text-orange-800 border-3 border-orange-400 px-2 py-0 text-sm font-bold font-mono">
+        {notification}
+      </p>
+    </div> : ''}
+  </>
 }

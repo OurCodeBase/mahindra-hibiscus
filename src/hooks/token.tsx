@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-type Token = {
+export type Token = {
   authorization: string;
 }
 
