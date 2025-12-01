@@ -4,7 +4,7 @@ export default defineManifest({
   manifest_version: 3,
   name: "mahindra-hibiscus",
   description: "A Chromium extension to check Mahindra Adrenox and Imaxx in bulk. ⚡️",
-  version: "1.4",
+  version: "1.5",
   icons: {
     16: "icon.png",
     32: "icon.png",
