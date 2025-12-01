@@ -1,8 +1,15 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+@theme {
+  --color-background: #191524;
+  --color-contessa: #C86174;
+  --color-contessa-dim: #b45768;
+  --color-muted-peach: #F25764;
+}
+
 .banner {
-  background-image: url('/banner.jpg');
+  background-image: url('/banner.png');
   background-size: cover; /* Stretches the image to cover the entire element */
   background-position: center center; /* Centers the image */
   background-repeat: no-repeat; /* Prevents image from repeating */
