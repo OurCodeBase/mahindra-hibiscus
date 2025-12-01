@@ -26,11 +26,16 @@ export default function App({ children }: { children: ReactNode }) {
   }, [])
   if (!unauthorized) return children;
   return (
-    <div className="py-16 px-16">
+    <div className="items-center bg-gradient-to-r from-[#191524] to-transparent">
       <Logo/>
-      <h1 className="font-mono font-bold text-center text-white w-full text-lg bg-red-600">
-        You don't have access to use this extension.
-      </h1>
+      <div className="p-10 bg-gradient-to-t from-[#191524] to-transparent to-60%">
+        <h1 className="text-6xl text-red-400 uppercase font-bold">
+          You're blocked
+        </h1>
+        <p className="uppercase font-bold text-[12px] tracking-widest">
+          You don't have access to use this extension.
+        </p>
+      </div>
     </div>
   )
 }
