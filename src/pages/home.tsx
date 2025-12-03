@@ -5,25 +5,10 @@ import Spreadsheet from "react-spreadsheet";
 import { Loader, Search } from "lucide-react";
 import { SearchConsole } from "@/utils/search";
 
-function Checkbox({ onChange, checked }: { onChange: (checked: boolean) => void, checked: boolean }) {
-  return (
-    <div className="relative flex justify-center items-center">
-      <label htmlFor="checkbox" className="relative flex size-8 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-tr from-[#4158D0] via-[#C850C0] to-[#FFCC70] p-2 duration-100 hover:p-2.5">
-        <input checked={checked} type="checkbox" className="group peer hidden" id="checkbox" onChange={(e) => {onChange(e.currentTarget.checked)}}/>
-        <label htmlFor="checkbox" className="size-full rounded-md bg-background peer-checked:size-0"/>
-        <div className="absolute left-[0.8rem] h-[4px] w-[14px] -translate-y-10 translate-x-10 rotate-[-41deg] rounded-sm bg-white duration-300 peer-checked:translate-x-0 peer-checked:translate-y-0"/>
-        <div className="absolute left-[0.4rem] top-4 h-[4px] w-[10px] -translate-x-10 -translate-y-10 rotate-[45deg] rounded-sm bg-white duration-300 peer-checked:translate-x-0 peer-checked:translate-y-0"/>
-      </label>
-      <span className="ml-2 flex flex-row w-[70px] font-bold">Check Commercials</span>
-    </div>
-  )
-}
-
 export default function App() {
   const { token, removeToken } = useToken();
   const [loading, setLoading] = useState(false);
   const [sheet, setSheet] = useState<Array<any>>([]);
-  const [service, setService] = useState<"service" | "service-cv">("service")
   const [notification, setNotification] = useState<string | undefined>()
   const callbacks = (action: 'logout' | 'clear') => {
     switch (action) {
@@ -38,8 +23,8 @@ export default function App() {
     }
   }
   const clickables: Array<{ title: string, color: string, callback: () => void }> = [
-    { title: "LOGOUT", color: "bg-[#D94E67]", callback: () => {callbacks('logout')} },
-    { title: "CLEAR", color: "bg-[#04668C]", callback: () => {callbacks('clear')} }
+    { title: "Leave", color: "bg-[#D94E67]", callback: () => {callbacks('logout')} },
+    { title: "Clear", color: "bg-[#04668C]", callback: () => {callbacks('clear')} }
   ]
   const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,7 +36,7 @@ export default function App() {
     try {
       if (!token) throw new Error("You need a session id first.");
       const searchConsole = new SearchConsole(token, search);
-      const database = await searchConsole.getAllKyc(service);
+      const database = await searchConsole.getAllKyc();
       chrome.storage.session.set({ "hibiscus-database": JSON.stringify(database) });
       setSheet(database);
     } catch (e) {
@@ -72,7 +57,12 @@ export default function App() {
   return <>
     <div className="max-w-md bg-gradient-to-tr from-background to-transparent">
       <Logo/>
-      <form onSubmit={handleSearch} className="flex justify-center py-10 w-full">
+      <div className="w-full flex justify-center pt-8">
+        <p className="bg-orange-300 text-orange-800 border-3 border-orange-400 p-1 px-3 text-xs font-black tracking-widest">
+          {token ? (`SEGMENT: ${token.subdomain == "service" ? "PERSONAL": "COMMERCIAL"}`) : "NO SOURCE"}
+        </p>
+      </div>
+      <form onSubmit={handleSearch} className="flex justify-center pt-2 pb-10 w-full">
         <input
           type="text"
           name="vinnos"
@@ -85,15 +75,13 @@ export default function App() {
         >
           {loading ? <Loader className="animate-spin"/> : <Search/>}
         </button>
-        <div className="mx-2 border-l-1"></div>
-        <Checkbox checked={service == "service-cv"} onChange={(checked) => {setService(checked ? "service-cv" : "service")}}/>
       </form>
-      {sheet.length > 0 && <div className="mt-2">
+      {sheet.length > 0 ? <div className="mt-2">
         <div className="max-h-[300px] overflow-auto">
           <Spreadsheet data={sheet} columnLabels={["VIN", "KYC", "SignUp", "Car Owner"]}/>
         </div>
-      </div>}
-      <div className="w-full flex justify-center py-4 tracking-widest font-mono font-bold">
+      </div> : ''}
+      <div className="w-full flex justify-center py-4 tracking-widest">
         {clickables.map(option => <button onClick={option.callback} key={option.title}
           className={`py-2 shadow-lg ${option.color} cursor-pointer mr-2 px-2 h-min text-nowrap rounded-md text-xs`}>
           {option.title}

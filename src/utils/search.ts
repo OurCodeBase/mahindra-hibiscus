@@ -56,11 +56,13 @@ export class SearchConsole {
       return row;
     }
   }
-  public async getAllKyc(service: "service" | "service-cv") {
+  public async getAllKyc() {
     const columns = [];
     for (let index = 0; index < this.vinnos.length; index++) {
       await sleep(randomDelay())
-      const rows = await this.getVehicleInfo(this.vinnos[index], service);
+      const vin = this.vinnos[index];
+      const subdomain = vin.startsWith('MA1R') ? 'service-cv' : 'service';
+      const rows = await this.getVehicleInfo(vin, subdomain);
       columns.push(rows);
     }
     return columns;

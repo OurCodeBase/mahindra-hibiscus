@@ -3,6 +3,9 @@ const onMessage = (message: any) => {
     const data: Record<string, string> = {}
     const onBeforeSendHeaders = (details: chrome.webRequest.OnBeforeSendHeadersDetails) => {
       if (!details.requestHeaders) return details;
+      const { url } = details;
+      const subdomain = url.split('.')[0].split('//')[1];
+      data['subdomain'] = subdomain;
       for (const header of details.requestHeaders) {
         const name = header.name.toLowerCase();
         if (['authorization'].includes(name)) {
@@ -10,7 +13,7 @@ const onMessage = (message: any) => {
         }
       }
       chrome.webRequest.onBeforeSendHeaders.removeListener(onBeforeSendHeaders);
-      if (Object.keys(data).length == 1) {
+      if (Object.keys(data).length == 2) {
         chrome.storage.session.set({ "hibiscus-authorization": JSON.stringify(data) })
       }
       return details;

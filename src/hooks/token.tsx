@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 export type Token = {
+  subdomain: string;
   authorization: string;
 }
 
